@@ -9,12 +9,18 @@
       <section class="panel">
         <div class="score">
           <div class="score-card">
-            <span class="label">X Wins</span>
-            <span class="value text-primary">{{ scoreX }}</span>
+            <span class="label" aria-hidden="true">X Wins</span>
+            <span class="value text-primary">
+              <span class="icon" role="img" aria-label="Knight wins" title="Knight wins">♞</span>
+              <span class="score-number" aria-label="Knight wins count">{{ scoreX }}</span>
+            </span>
           </div>
           <div class="score-card">
-            <span class="label">O Wins</span>
-            <span class="value text-amber">{{ scoreO }}</span>
+            <span class="label" aria-hidden="true">O Wins</span>
+            <span class="value text-amber">
+              <span class="icon" role="img" aria-label="Queen wins" title="Queen wins">♛</span>
+              <span class="score-number" aria-label="Queen wins count">{{ scoreO }}</span>
+            </span>
           </div>
           <div class="score-card">
             <span class="label">Draws</span>
@@ -30,7 +36,14 @@
               :class="currentPlayer === 'X' ? 'text-primary' : 'text-amber'"
               aria-live="polite"
             >
-              {{ currentPlayer }}
+              <span
+                class="icon"
+                role="img"
+                :aria-label="currentPlayer === 'X' ? 'Knight turn' : 'Queen turn'"
+                :title="currentPlayer === 'X' ? 'Knight turn' : 'Queen turn'"
+              >
+                {{ pieceFor(currentPlayer) }}
+              </span>
             </span>
           </template>
 
@@ -42,7 +55,16 @@
               :class="winner === 'X' ? 'text-primary' : 'text-amber'"
               aria-live="polite"
             >
-              {{ winner }} wins!
+              <span
+                class="icon"
+                role="img"
+                :aria-label="winner === 'X' ? 'Knight wins' : 'Queen wins'"
+                :title="winner === 'X' ? 'Knight wins' : 'Queen wins'"
+              >
+                {{ pieceFor(winner) }}
+              </span>
+              <span class="visually-hidden"> wins!</span>
+              <span aria-hidden="true"> wins!</span>
             </span>
             <span v-else class="status-player text-gray" aria-live="polite">Draw</span>
           </template>
@@ -66,7 +88,15 @@
             @click="onCellClick(idx)"
           >
             <span class="cell-content" :class="{ 'fade-in': cell }">
-              {{ cell }}
+              <span
+                v-if="cell"
+                class="icon"
+                role="img"
+                :aria-label="cell === 'X' ? 'Knight' : 'Queen'"
+                :title="cell === 'X' ? 'Knight' : 'Queen'"
+              >
+                {{ pieceFor(cell) }}
+              </span>
             </span>
           </button>
         </div>
@@ -123,6 +153,12 @@ function cellClass(index: number) {
     'is-last-move': lastMoveIndex.value === index && !isCellInWinningLine(index),
   }
 }
+
+// PUBLIC_INTERFACE
+function pieceFor(player: 'X' | 'O'): string {
+  /** Returns the chess icon for a given player: Knight for X, Queen for O. */
+  return player === 'X' ? '♞' : '♛'
+}
 </script>
 
 <style scoped>
@@ -136,6 +172,19 @@ function cellClass(index: number) {
   --text:          #111827;   /* Dark text */
   --muted:         #6b7280;   /* Gray-500 */
   --ring:          rgba(37, 99, 235, 0.25);
+}
+
+/* Utility for screen-reader-only content */
+.visually-hidden {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
 }
 
 /* Layout */
@@ -209,6 +258,22 @@ function cellClass(index: number) {
 .value {
   font-size: 1.1rem;
   font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+/* Chess icon styling for consistent sizing */
+.icon {
+  font-size: 1.2em; /* slightly larger than surrounding text for emphasis */
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.score-number {
+  font-variant-numeric: tabular-nums;
 }
 
 .text-primary { color: var(--color-primary); }
